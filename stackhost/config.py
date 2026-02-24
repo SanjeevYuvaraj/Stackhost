@@ -1,5 +1,6 @@
 API_ID = 123456
-API_HASH = "API_HASH_HERE"
-BOT_TOKEN = "BOT_TOKEN_HERE"
+API_HASH = "API_HASH"
+BOT_TOKEN = "BOT_TOKEN"
 
-MONGO_URI = "mongodb+srv://username:password@cluster.mongodb.net"
+MONGO_URI = "mongodb://localhost:27017"
+OWNER_ID = 123456789
