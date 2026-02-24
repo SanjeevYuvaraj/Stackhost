@@ -1,34 +1,44 @@
 import subprocess
 import os
 
-running_process = {}
+running = {}
 
-def clone_repo(repo, user_id):
-    path = f"bots/{user_id}"
+def clone_repo(repo, bot_id):
+    path = f"bots/{bot_id}"
 
     if os.path.exists(path):
-        subprocess.run(["rm", "-rf", path])
+        subprocess.run(["rm","-rf",path])
 
-    subprocess.run(["git", "clone", repo, path])
+    subprocess.run(["git","clone",repo,path])
     return path
 
 
-def install_requirements(path):
+def install_req(path):
     req = f"{path}/requirements.txt"
     if os.path.exists(req):
-        subprocess.run(["pip3", "install", "-r", req])
+        subprocess.run(["pip3","install","-r",req])
 
 
-def start_bot(path, user_id):
+def start_bot(path, bot_id):
+
+    log_file = open(f"logs/{bot_id}.log","w")
+
     process = subprocess.Popen(
-        ["python3", "bot.py"],
-        cwd=path
+        ["python3","bot.py"],
+        cwd=path,
+        stdout=log_file,
+        stderr=log_file
     )
 
-    running_process[user_id] = process
+    running[bot_id] = process
     return process.pid
 
 
-def stop_bot(user_id):
-    if user_id in running_process:
-        running_process[user_id].terminate()
+def stop_bot(bot_id):
+    if bot_id in running:
+        running[bot_id].terminate()
+
+
+def restart_bot(path, bot_id):
+    stop_bot(bot_id)
+    return start_bot(path, bot_id)
