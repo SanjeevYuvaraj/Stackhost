@@ -15,21 +15,24 @@ print('''
 
 @client.on(events.NewMessage(from_users=target_bot_id))
 async def handle_messages(event):
-    # Condition 1: Handle Encounter Buttons
+    # Condition 1: Handle Encounter Buttons (Clicks the first button)
     if "❰ 𝗘 𝗡 𝗖 𝗢 𝗨 𝗡 𝗧 𝗘 𝗥 𝗘 𝗗 ❱" in event.raw_text:
         if event.buttons:
             await event.click(0, 0)
             print("Clicked encounter button.")
 
-    # Condition 2: Handle Victory or Defeat
-    elif "🏆 𝗩𝗜𝗖𝗧𝗢𝗥𝗬" in event.raw_text or "💀 𝗗𝗘𝗙𝗘𝗔𝗧" in event.raw_text:
+    # Condition 2: Handle Slay Reward, Reward, or Defeat
+    elif any(word in event.raw_text for word in ["SLAY REWARD", "REWARD", "💀 𝗗𝗘𝗙𝗘𝗔𝗧"]):
         await event.respond("/explore")
-        print("Outcome detected! Sent /explore.")
+        print("Battle outcome detected! Sent /explore.")
 
 async def main():
     await client.start()
-    print("Client is running...")
+    print("Client is running... Press Ctrl+C to stop.")
     await client.run_until_disconnected()
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nStopped by user.")
