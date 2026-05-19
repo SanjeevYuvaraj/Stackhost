@@ -10,12 +10,12 @@ client = TelegramClient('session_name', api_id, api_hash)
 
 print('''
        BHOT MEHNAT LAGI HAI BHAMYA EDIT MAT KRNA CODE
-       YUVI
+       SHOURYA
 ''')
 
 @client.on(events.NewMessage(from_users=target_bot_id))
 async def handle_messages(event):
-    # Fix 1: Used any() to properly check for multiple possible strings
+    # Condition 1: Handle Encounter Buttons (Clicks the first button)
     encounter_phrases = ["❰ 𝗘 𝗡 𝗖 𝗢 𝗨 𝗡 𝗧 𝗘 𝗥 𝗘 𝗗 ❱", "❰ 𝗖 𝗛 𝗔 𝗥 𝗔 𝗖 𝗧 𝗘 𝗥 ❱", "❰ 𝗙𝗟𝗢𝗢𝗥 𝗕𝗢𝗦𝗦 ❱"]
     
     if any(phrase in event.raw_text for phrase in encounter_phrases):
@@ -23,21 +23,18 @@ async def handle_messages(event):
             await event.click(0, 0)
             print("Clicked encounter button.")
 
-    # Condition 2: Handle Slay Reward, Reward, or Defeat
-    elif any(word in event.raw_text for word in ["SLAY REWARD", "REWARD", "💀 𝗗𝗘𝗙𝗘𝗔𝗧", "𝗠𝗬𝗦𝗧𝗘𝗥𝗜𝗢𝗨𝗦 𝗧𝗥𝗔𝗗𝗘𝗥", "❰ 𝗧𝗔𝗜𝗟𝗘𝗗 𝗕𝗘𝗔𝗦𝗧 ❱"]):
-        # It's best practice to reply directly to the entity/chat the event came from
+    # Condition 2: Handle Slay Reward, Reward, Defeat, or Aura Crate
+    elif any(word in event.raw_text for word in ["SLAY REWARD", "REWARD", "💀 𝗗𝗘𝗙𝗘𝗔𝗧", "𝗠𝗬𝗦𝗧𝗘𝗥𝗜𝗢𝗨𝗦 𝗧𝗥𝗔𝗗𝗘𝗥", "❰ 𝗧𝗔𝗜𝗟𝗘𝗗 𝗕𝗘𝗔𝗦𝗧 ❱", "𝖠𝖴𝖱𝖠 𝖢𝖱𝖠𝖳𝖤"]):
         await event.respond("/explore")
-        print("Battle outcome detected! Sent /explore.")
+        print("Battle outcome or Aura Crate detected! Sent /explore.")
 
 async def main():
     await client.start()
     print("Client is running... Press Ctrl+C to stop.")
     await client.run_until_disconnected()
 
-# Fix 2: Corrected __name__ syntax
 if __name__ == '__main__':
     try:
-        # Fix 3: Standard way to initiate the Telethon async loop
         client.loop.run_until_complete(main())
     except KeyboardInterrupt:
         print("\nStopped by user.")
