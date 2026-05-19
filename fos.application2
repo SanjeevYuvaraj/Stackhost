@@ -1,40 +1,71 @@
 import asyncio
 from telethon import TelegramClient, events
 
-# Configuration
-api_id = 8447214
-api_hash = '9ec5782ddd935f7e2763e5e49a590c0d'
-target_bot_id = 8015674697
+# Configuration for multiple accounts
+ACCOUNTS = [
+    {
+        "session_name": "account_one",
+        "api_id": 8447214,
+        "api_hash": "9ec5782ddd935f7e2763e5e49a590c0d"
+    },
+    {
+        "session_name": "account_two",
+        "api_id": 1234567,  # Replace with your 2nd account API ID
+        "api_hash": "abcdef1234567890abcdef1234567890"  # Replace with your 2nd account API Hash
+    },
+    {
+        "session_name": "account_three",
+        "api_id": 7654321,  # Replace with your 3rd account API ID
+        "api_hash": "fedcba0987654321fedcba0987654321"  # Replace with your 3rd account API Hash
+    }
+]
 
-client = TelegramClient('session_name', api_id, api_hash)
+target_bot_id = 8015674697
 
 print('''
        BHOT MEHNAT LAGI HAI BHAMYA EDIT MAT KRNA CODE
-       SHOURYA
+       Yuvi (3-Account Edition)
 ''')
 
-@client.on(events.NewMessage(from_users=target_bot_id))
-async def handle_messages(event):
-    # Condition 1: Handle Encounter Buttons (Clicks the first button)
-    encounter_phrases = ["❰ 𝗘 𝗡 𝗖 𝗢 𝗨 𝗡 𝗧 𝗘 𝗥 𝗘 𝗗 ❱", "❰ 𝗖 𝗛 𝗔 𝗥 𝗔 𝗖 𝗧 𝗘 𝗥 ❱", "❰ 𝗙𝗟𝗢𝗢𝗥 𝗕𝗢𝗦𝗦 ❱"]
-    
-    if any(phrase in event.raw_text for phrase in encounter_phrases):
-        if event.buttons:
-            await event.click(0, 0)
-            print("Clicked encounter button.")
+# This function registers the event handler for a specific client
+def register_handlers(client, session_name):
+    @client.on(events.NewMessage(from_users=target_bot_id))
+    async def handle_messages(event):
+        encounter_phrases = ["❰ 𝗘 𝗡 𝗖 𝗢 𝗨 𝗡 𝗧 𝗘 𝗥 𝗘 𝗗 ❱", "❰ 𝗖 𝗛 𝗔 𝗥 𝗔 𝗖 𝗧 𝗘 𝗥 ❱", "❰ 𝗙𝗟𝗢𝗢𝗥 𝗕𝗢𝗦𝗦 ❱"]
+        
+        # Condition 1: Handle Encounter Buttons
+        if any(phrase in event.raw_text for phrase in encounter_phrases):
+            if event.buttons:
+                await event.click(0, 0)
+                print(f"[{session_name}] Clicked encounter button.")
 
-    # Condition 2: Handle Slay Reward, Reward, Defeat, or Aura Crate
-    elif any(word in event.raw_text for word in ["SLAY REWARD", "REWARD", "💀 𝗗𝗘𝗙𝗘𝗔𝗧", "𝗠𝗬𝗦𝗧𝗘𝗥𝗜𝗢𝗨𝗦 𝗧𝗥𝗔𝗗𝗘𝗥", "❰ 𝗧𝗔𝗜𝗟𝗘𝗗 𝗕𝗘𝗔𝗦𝗧 ❱", "𝖠𝖴𝖱𝖠 𝖢𝖱𝖠𝖳𝖤"]):
-        await event.respond("/explore")
-        print("Battle outcome or Aura Crate detected! Sent /explore.")
+        # Condition 2: Handle Slay Reward, Reward, Defeat, or Aura Crate
+        elif any(word in event.raw_text for word in ["SLAY REWARD", "REWARD", "💀 𝗗𝗘𝗙𝗘𝗔𝗧", "𝗠𝗬𝗦𝗧𝗘𝗥𝗜𝗢𝗨𝗦 𝗧𝗥𝗔𝗗Ｅ𝗥", "❰ 𝗧𝗔𝗜𝗟𝗘𝗗 𝗕𝗘𝗔𝗦𝗧 ❱", "𝖠𝖴𝖱𝖠 𝖢𝖱𝖠𝖳𝖤"]):
+            await event.respond("/explore")
+            print(f"[{session_name}] Battle outcome/Aura Crate detected! Sent /explore.")
 
 async def main():
-    await client.start()
-    print("Client is running... Press Ctrl+C to stop.")
-    await client.run_until_disconnected()
+    clients = []
+    
+    # Initialize and start all clients
+    for acc in ACCOUNTS:
+        print(f"Starting session: {acc['session_name']}...")
+        client = TelegramClient(acc['session_name'], acc['api_id'], acc['api_hash'])
+        
+        # Register the logic for this specific client
+        register_handlers(client, acc['session_name'])
+        
+        await client.start()
+        clients.append(client)
+        print(f"Session {acc['session_name']} started successfully!")
+
+    print("\nAll 3 clients are running concurrently... Press Ctrl+C to stop.")
+    
+    # Keep all clients running until disconnected
+    await asyncio.gather(*(client.run_until_disconnected() for client in clients))
 
 if __name__ == '__main__':
     try:
-        client.loop.run_until_complete(main())
+        asyncio.run(main())
     except KeyboardInterrupt:
         print("\nStopped by user.")
