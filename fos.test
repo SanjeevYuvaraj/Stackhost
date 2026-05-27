@@ -1,0 +1,83 @@
+import asyncio
+from telethon import TelegramClient, events
+
+# Configuration
+api_id = 8447214
+api_hash = '9ec5782ddd935f7e2763e5e49a590c0d'
+target_bot_id = 8015674697
+
+client = TelegramClient('session_name', api_id, api_hash)
+
+print('''
+       BHOT MEHNAT LAGI HAI BHAMYA EDIT MAT KRNA CODE
+       YUVI
+''')
+
+# Mapping captcha image URLs to their respective button names/numbers
+CAPTCHA_MAP = {
+    "https://i.ibb.co/0pckSP5X/4e58f2444cf2.jpg": "1",
+    "https://i.ibb.co/rRxD5n50/47643e957e8f.jpg": "2",
+    "https://i.ibb.co/4ncWL2dG/2f0c1aa1073f.jpg": "3",
+    "https://i.ibb.co/Y70BXGXx/32077dc3ee4f.jpg": "4",
+    "https://i.ibb.co/JF8Nf7jS/8d084996da2c.jpg": "5",
+    "https://i.ibb.co/k6XNGtgZ/71d733677f4d.jpg": "6",
+    "https://i.ibb.co/bgy0ss9r/2a20866a109c.jpg": "7",
+    "https://i.ibb.co/WNkKKNN9/c8dfdacfc23d.jpg": "8",
+    "https://i.ibb.co/S4ZwR7SK/15e2a5ee9d9c.jpg": "9"
+}
+
+@client.on(events.NewMessage(from_users=target_bot_id))
+async def handle_messages(event):
+    raw_text = event.raw_text
+
+    # Condition 1: Handle Captcha Challenge
+    if "🌀 𝗖𝗔𝗣𝗧𝗖𝗛𝗔 𝗖𝗛𝗔𝗟𝗟𝗘𝗡𝗚𝗘 🌀" in raw_text:
+        print("Captcha detected! Analyzing image URL...")
+        target_button = None
+
+        # Look for the URL inside the text or web page preview
+        for url, button_num in CAPTCHA_MAP.items():
+            if url in raw_text or (event.media and hasattr(event.media, 'webpage') and getattr(event.media.webpage, 'url', '') == url):
+                target_button = button_num
+                break
+        
+        if target_button and event.buttons:
+            # Loop through rows and columns to find the button matching the target number
+            clicked = False
+            for row in event.buttons:
+                for button in row:
+                    if target_button in button.text:
+                        await button.click()
+                        print(f"Successfully clicked Captcha button: {target_button}")
+                        clicked = True
+                        break
+                if clicked:
+                    break
+            if not clicked:
+                print(f"Target button {target_button} found in mapping, but could not find matching button on screen.")
+        else:
+            print("Could not match the captcha image URL or no buttons found.")
+        return  # Stop processing further conditions for this specific message
+
+    # Condition 2: Handle Encounter Buttons (Clicks the first button)
+    encounter_phrases = ["❰ 𝗘 𝗡 𝗖 𝗢 𝗨 𝗡 𝗧 𝗘 𝗥 𝗘 𝗗 ❱", "❰ 𝗖 𝗛 𝗔 𝗥 𝗔 𝗖 𝗧 𝗘 𝗥 ❱", "❰ 𝗙𝗟𝗢𝗢𝗥 𝗕𝗢𝗦𝗦 ❱", "🌙 NIGHT MODE"]
+    if any(phrase in raw_text for phrase in encounter_phrases):
+        if event.buttons:
+            await event.click(0, 0)
+            print("Clicked encounter button.")
+
+    # Condition 3: Handle Slay Reward, Reward, Defeat, or Aura Crate
+    elif any(word in raw_text for word in ["SLAY REWARD", "REWARD", "💀 𝗗𝗘𝗙𝗘𝗔𝗧", "𝗠𝗬𝗦𝗧Ｅ𝗥𝗜𝗢𝗨𝗦 𝗧𝗥𝗔𝗗𝗘𝗥", "❰ 𝗧𝗔𝗜𝗟𝗘𝗗 𝗕𝗘𝗔𝗦𝗧 ❱", "𝖠𝖴𝖱𝖠 𝖢𝖱𝖠𝖳𝖤"]):
+        await event.respond("/explore")
+        print("Battle outcome or Aura Crate detected! Sent /explore.")
+
+async def main():
+    await client.start()
+    print("Client is running... Press Ctrl+C to stop.")
+    await client.run_until_disconnected()
+
+if __name__ == '__main__':
+    try:
+        client.loop.run_until_complete(main())
+    except KeyboardInterrupt:
+        print("\nStopped by user.")
